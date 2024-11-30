@@ -1,0 +1,88 @@
+RC4 Key: 0xCC91B1EA2C16519AB22614AE2929960A
+IP: REVOKED
+Port: REVOKED
+ 
+Authentication:
+req: 0x10 | size: 0x4028
+struct AuthentcationRequest {
+    DWORD Version;
+    BYTE CPUKey[0x10];
+    BYTE ModuleHash[0x14];
+    BYTE KV[0x4000];
+}; // total size: 0x4028
+ 
+Auth response is just a 4 byte flag. (0x4A000000 = success | 0x40000000 = update)
+After receving the response, it'll try to receive a 148 byte array containing their cod patches.
+ 
+Presence:
+req: 0x20 | size: 0x38
+struct PresenceRequest {
+    BYTE CPUKey[0x10];
+    BYTE ModuleHash[0x14];
+    char Gamertag[0x10];
+    DWORD KVStatus;
+}; // total size: 0x38
+ 
+struct PresenceResponse {
+    DWORD Flag;
+    DWORD TimeDays;
+    DWORD TimeHours;
+    DWORD TimeMinutes;
+    DWORD KVTimeDays;
+    DWORD KVTimeHours;
+    DWORD KVTimeMinutes;
+    DWORD unk1; // 0x00000032
+    DWORD unk2; // 0x0000000A
+}; // total size: 0x24
+ 
+flags:
+Update: 0x40000000
+HasTime: 0x4A000000
+Freemode: 0x4B000000
+Lifetime: 0x4D000000
+Expired: 0x4E000000
+Banned: 0x4F000000
+ 
+XamChallenge:
+req: 0x30 | size: 0x2D
+struct XamChallengeRequest {
+    BYTE CPUKey[0x10];
+    BYTE HVSalt[0x10];
+    byte PartNumber;
+    DWORD CRL;
+    DWORD FCRT;
+    DWORD TypeOneKV;
+}; // total size: 0x2D
+ 
+XamChallenge response is just a 4 byte flag. (0x4A000000 = success)
+It then received the challenge buffer, size: 0x100
+ 
+XOSC:
+req: 0x40 | size: 0x320
+struct XOSCRequest {
+    BYTE XOSCBuffer[0x2E0];
+    DWORD TitleId;
+    BYTE CPUKey[0x10];
+    BYTE KVDigest[0x14];
+    BYTE Final1[0x10];
+    BYTE Final2[0x8];
+}; // total size: 0x320
+ 
+XOSC response is just a 4 byte flag. (0x4A000000 = success)
+It then received the challenge buffer, size: 0x2E0
+ 
+Engine Downloading:
+req: 0x60 | size: 0x14
+struct DownloadEngine {
+    BYTE CPUKey[0x10];
+    DWORD TitleId;
+}; // total size: 0x14
+ 
+Engine downloading response is just a 4 byte flag. (0x14187F41 = success)
+It will then receive the following struct from the server:
+struct EngineData {
+    char EngineName[0x10];
+    DWORD EngineSize;
+};
+ 
+It will then receive a buffer of the size of EngineSize. (This is le engine)
